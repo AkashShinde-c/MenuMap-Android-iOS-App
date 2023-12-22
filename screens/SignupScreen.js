@@ -87,6 +87,7 @@ export default function SignupScreen({ navigation }) {
       navigation.replace("Home");
     } catch (error) {
       Alert.alert("Something went wrong");
+      console.log(error)
     }
   };
 
