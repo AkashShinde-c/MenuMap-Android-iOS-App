@@ -9,6 +9,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import danger from "../assets/danger.svg";
 import ok from "../assets/ok.svg";
+// import scheduleNotification from "../utils/Notification";
 
 export default function HomeScreen({ navigation }) {
   const [image, setImage] = useState("");
@@ -68,6 +69,7 @@ export default function HomeScreen({ navigation }) {
     /**Get camrea permission */
     (async () => {
       await requestPermission();
+      // scheduleNotification();
     })();
     /**Get  token*/
     (async () => {
@@ -80,12 +82,15 @@ export default function HomeScreen({ navigation }) {
       };
       try {
         const response = await api.get("/get-download-url", options);
-        console.log(response.data);
+        const downloadResponse = await axios.get(response.data.url);
+        setImage(`data:image/jpeg;base64,${downloadResponse.data}`);
         setIs_menu_updated(response.data.is_menu_updated);
       } catch (error) {
-        Alert.alert("Could not get status");
+        // Handle errors here
+        Alert.alert(error.message)
       }
     })();
+
   }, []);
   return (
     <View style={styles.container}>
@@ -94,14 +99,17 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.heading}>
           <Text style={styles.title}>Athavan</Text>
         </View>
-      {is_menu_updated?( <View style={styles.ok}>
-          <Image source={ok} style={styles.mainImage} />
-          <Text style={styles.subtitle2}>Mneu updated. All set..!</Text>
-        </View>):
-        (<View style={styles.warning}>
-          <Image source={danger} style={styles.mainImage} />
-          <Text style={styles.subtitle}>Today's menu not updated</Text>
-        </View>)}
+        {is_menu_updated ? (
+          <View style={styles.ok}>
+            <Image source={ok} style={styles.mainImage} />
+            <Text style={styles.subtitle2}>Menu updated. All set..!</Text>
+          </View>
+        ) : (
+          <View style={styles.warning}>
+            <Image source={danger} style={styles.mainImage} />
+            <Text style={styles.subtitle}>Today's menu not updated</Text>
+          </View>
+        )}
         <View style={styles.mainImageContainer}>
           {is_menu_updated && image ? (
             <View style={styles.imageLoaded}>
@@ -167,7 +175,7 @@ const styles = StyleSheet.create({
     color: "#F32121",
     textAlign: "center",
   },
-  subtitle2:{
+  subtitle2: {
     fontSize: 16,
     color: "#2EA147",
     textAlign: "center",
@@ -203,7 +211,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
   },
-  ok:{
+  ok: {
     backgroundColor: "#E0FFE7",
     flexDirection: "row",
     padding: 5,
