@@ -31,14 +31,13 @@ export default function HomeScreen({ navigation }) {
 
         // const imgSrc = URL.createObjectURL(blobData._data);
         setImage(`data:image/jpeg;base64,${result.assets[0].base64}`);
-
+        setIs_menu_updated(true);
         const response = await axios.put(url, result.assets[0].base64);
-        //   console.log(response)
+
         Alert.alert("Image uploaded successfully!");
       }
     } catch (error) {
       Alert.alert("Something went wrong");
-      console.log(error);
     }
   };
 
@@ -47,6 +46,7 @@ export default function HomeScreen({ navigation }) {
       const headers = {
         Authorization: await AsyncStorage.getItem("token"),
       };
+
       const response = await api.get("/get-upload-url", { headers });
 
       const uploadUrl = response.data.url;
@@ -54,7 +54,6 @@ export default function HomeScreen({ navigation }) {
       uploadImage(uploadUrl);
     } catch (error) {
       Alert.alert("Error", "error");
-      console.log(error);
     }
   };
 
@@ -82,16 +81,29 @@ export default function HomeScreen({ navigation }) {
       };
       try {
         const response = await api.get("/get-download-url", options);
+        if (isExpired(response.data.time)) {
+          setIs_menu_updated(false);
+          return;
+        }
         const downloadResponse = await axios.get(response.data.url);
         setImage(`data:image/jpeg;base64,${downloadResponse.data}`);
         setIs_menu_updated(response.data.is_menu_updated);
       } catch (error) {
         // Handle errors here
-        Alert.alert(error.message)
+        Alert.alert(error.message);
       }
     })();
-
   }, []);
+
+  const isExpired = (time) => {
+    const receivedTime = new Date(time);
+    const currentTime = new Date();
+
+    const timeDifferenceInMilliseconds = currentTime - receivedTime;
+    const timeDifferenceInHours =
+      timeDifferenceInMilliseconds / (1000 * 60 * 60);
+    return timeDifferenceInHours > 3.5;
+  };
   return (
     <View style={styles.container}>
       <Navbar></Navbar>
