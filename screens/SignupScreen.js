@@ -18,6 +18,10 @@ import api from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 
+import * as TaskManager from "expo-task-manager";
+
+const LOCATION_TASK_NAME = "background-location-task";
+
 export default function SignupScreen({ navigation }) {
   const messNameRef = useRef(null);
   const ownerNameRef = useRef(null);
@@ -31,35 +35,37 @@ export default function SignupScreen({ navigation }) {
   const handleGetLocation = async () => {
     try {
       const lo = await Location.requestForegroundPermissionsAsync();
-      console.log(lo)
-
       if (lo.status !== "granted") {
+        await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+          accuracy: Location.Accuracy.Highest,
+        });
         Toast.show({
           type: "error",
           text1: "Location access needed",
-          text2: JSON.stringify(lo),
+          text2: "Your location is needed for this operation",
         });
-        
+
         return;
       }
 
+       
       const location = await Location.getCurrentPositionAsync({});
+
+      console.log(location);
       setCurrentLocation({
         lat: location.coords.latitude,
         lng: location.coords.longitude,
       });
+
       locationRef.current &&
         locationRef.current.setNativeProps({
           text: `${location.coords.latitude}, ${location.coords.longitude}`,
         });
     } catch (error) {
-      locationRef.current.setNativeProps({
-        text: JSON.stringify(error),
-      });
       Toast.show({
         type: "error",
-        text1: "Couldn't get loation !",
-        text2: JSON.stringify(error),
+        text1: "Couldn't get location",
+        text2: "Unexpected error",
       });
     }
   };
@@ -68,7 +74,6 @@ export default function SignupScreen({ navigation }) {
 
   const handleSignup = async () => {
     try {
-      
       const data = {
         username: usernameRef.current.value,
         password: passwordRef.current.value,
@@ -81,17 +86,17 @@ export default function SignupScreen({ navigation }) {
       console.log(response.data);
       await AsyncStorage.setItem("token", response.data.token);
       Toast.show({
-        type:"success",
-        text1:"Congratulations!",
-        text2:"Your account has been created !"
-      })
+        type: "success",
+        text1: "Congratulations!",
+        text2: "Your account has been created !",
+      });
       navigation.replace("Home");
     } catch (error) {
       Toast.show({
-        type:"error",
-        text1:"Error !",
-        text2:"Something went wrong",
-      })
+        type: "error",
+        text1: "Error !",
+        text2: "Something went wrong",
+      });
       console.log(error);
     }
   };
