@@ -37,8 +37,9 @@ export default function SignupScreen({ navigation }) {
         Toast.show({
           type: "error",
           text1: "Location access needed",
-          text2: "Location permission is required!",
+          text2: JSON.stringify(lo),
         });
+        
         return;
       }
 
@@ -52,10 +53,13 @@ export default function SignupScreen({ navigation }) {
           text: `${location.coords.latitude}, ${location.coords.longitude}`,
         });
     } catch (error) {
+      locationRef.current.setNativeProps({
+        text: JSON.stringify(error),
+      });
       Toast.show({
         type: "error",
         text1: "Couldn't get loation !",
-        text2: error,
+        text2: JSON.stringify(error),
       });
     }
   };
