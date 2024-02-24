@@ -16,6 +16,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import api from "../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 export default function SignupScreen({ navigation }) {
   const messNameRef = useRef(null);
@@ -29,13 +30,15 @@ export default function SignupScreen({ navigation }) {
 
   const handleGetLocation = async () => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const lo = await Location.requestForegroundPermissionsAsync();
+      console.log(lo)
 
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Location permission is required to get your current location."
-        );
+      if (lo.status !== "granted") {
+        Toast.show({
+          type: "error",
+          text1: "Location access needed",
+          text2: "Location permission is required!",
+        });
         return;
       }
 
@@ -49,11 +52,11 @@ export default function SignupScreen({ navigation }) {
           text: `${location.coords.latitude}, ${location.coords.longitude}`,
         });
     } catch (error) {
-      Alert.alert(
-        "Error",
-        "Failed to get location. Please enable location services."
-      );
-      console.error(error);
+      Toast.show({
+        type: "error",
+        text1: "Couldn't get loation !",
+        text2: error,
+      });
     }
   };
 
@@ -61,16 +64,6 @@ export default function SignupScreen({ navigation }) {
 
   const handleSignup = async () => {
     try {
-      // if (
-      //   !usernameRef.current || !usernameRef.current.value ||
-      //   !passwordRef.current || !passwordRef.current.value ||
-      //   !messNameRef.current || !messNameRef.current.value ||
-      //   !ownerNameRef.current || !ownerNameRef.current.value ||
-      //   !locationRef.current || !locationRef.current.value
-      // ) {
-      //   Alert.alert("Validation Error", "All fields are required");
-      //   return;
-      // }
       
       const data = {
         username: usernameRef.current.value,
@@ -83,130 +76,137 @@ export default function SignupScreen({ navigation }) {
       const response = await api.post("/create-account", data);
       console.log(response.data);
       await AsyncStorage.setItem("token", response.data.token);
-      Alert.alert("Success","Account created successfully")
+      Toast.show({
+        type:"success",
+        text1:"Congratulations!",
+        text2:"Your account has been created !"
+      })
       navigation.replace("Home");
     } catch (error) {
-      Alert.alert("Something went wrong");
-      console.log(error)
+      Toast.show({
+        type:"error",
+        text1:"Error !",
+        text2:"Something went wrong",
+      })
+      console.log(error);
     }
   };
 
   return (
     <ScrollView style={styles.container}>
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View>
-
-       
-        <View style={styles.headingContainer}>
-          <Text style={styles.headingText}>Create account</Text>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Mess</Text>
-            <View style={styles.inputField}>
-              <FontAwesome name="cutlery" size={20} color="skyblue" />
-              <TextInput
-                placeholder="Enter mess name"
-                style={styles.textInput}
-                ref={messNameRef}
-                onChangeText={(e) => (messNameRef.current.value = e)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Owner</Text>
-            <View style={styles.inputField}>
-              <FontAwesome name="user" size={20} color="skyblue" />
-              <TextInput
-                placeholder="Enter owner name"
-                style={styles.textInput}
-                ref={ownerNameRef}
-                
-                onChangeText={(e) => (ownerNameRef.current.value = e)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Username</Text>
-            <View style={styles.inputField}>
-              <FontAwesome name="user-circle" size={20} color="skyblue" />
-              <TextInput
-                placeholder="Choose a username"
-                style={styles.textInput}
-                ref={usernameRef}
-                onChangeText={(e) => (usernameRef.current.value = e)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Password</Text>
-            <View style={styles.inputField}>
-              <FontAwesome name="lock" size={20} color="skyblue" />
-              <TextInput
-                placeholder="Choose a password"
-                secureTextEntry
-                style={styles.textInput}
-                ref={passwordRef}
-                onChangeText={(e) => (passwordRef.current.value = e)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Location</Text>
-            <View style={styles.inputField}>
-              <FontAwesome name="map-marker" size={20} color="skyblue" />
-              <TextInput
-                placeholder="Select Location"
-                style={styles.textInput}
-                ref={locationRef}
-                onChangeText={(e) => locationRef.current.value}
-              />
-              <TouchableOpacity
-                style={styles.locationButton}
-                onPress={handleGetLocation}
-              >
-                <FontAwesome name="map-marker" size={20} color="red" />
-
-                <Text style={styles.locationButtonText}>Get Location</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.createAccountContainer}>
-          <TouchableOpacity
-            style={styles.createAccountButton}
-            onPress={handleSignup}
-          >
-            <Text style={styles.createAccountButtonText}>Create Account</Text>
-          </TouchableOpacity>
-          <View style={styles.center}>
-            <Text>OR</Text>
-          </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View>
-            <TouchableOpacity
-              style={styles.createAccountButton}
-              onPress={() => navigation.replace("Login")}
-            >
-              <Text style={styles.createAccountButtonText}>Log In</Text>
-            </TouchableOpacity>
+            <View style={styles.headingContainer}>
+              <Text style={styles.headingText}>Create account</Text>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Mess</Text>
+                <View style={styles.inputField}>
+                  <FontAwesome name="cutlery" size={20} color="skyblue" />
+                  <TextInput
+                    placeholder="Enter mess name"
+                    style={styles.textInput}
+                    ref={messNameRef}
+                    onChangeText={(e) => (messNameRef.current.value = e)}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Owner</Text>
+                <View style={styles.inputField}>
+                  <FontAwesome name="user" size={20} color="skyblue" />
+                  <TextInput
+                    placeholder="Enter owner name"
+                    style={styles.textInput}
+                    ref={ownerNameRef}
+                    onChangeText={(e) => (ownerNameRef.current.value = e)}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Username</Text>
+                <View style={styles.inputField}>
+                  <FontAwesome name="user-circle" size={20} color="skyblue" />
+                  <TextInput
+                    placeholder="Choose a username"
+                    style={styles.textInput}
+                    ref={usernameRef}
+                    onChangeText={(e) => (usernameRef.current.value = e)}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <View style={styles.inputField}>
+                  <FontAwesome name="lock" size={20} color="skyblue" />
+                  <TextInput
+                    placeholder="Choose a password"
+                    secureTextEntry
+                    style={styles.textInput}
+                    ref={passwordRef}
+                    onChangeText={(e) => (passwordRef.current.value = e)}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Location</Text>
+                <View style={styles.inputField}>
+                  <FontAwesome name="map-marker" size={20} color="skyblue" />
+                  <TextInput
+                    placeholder="Select Location"
+                    style={styles.textInput}
+                    ref={locationRef}
+                    onChangeText={(e) => locationRef.current.value}
+                  />
+                  <TouchableOpacity
+                    style={styles.locationButton}
+                    onPress={handleGetLocation}
+                  >
+                    <FontAwesome name="map-marker" size={20} color="red" />
+
+                    <Text style={styles.locationButtonText}>Get Location</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.createAccountContainer}>
+              <TouchableOpacity
+                style={styles.createAccountButton}
+                onPress={handleSignup}
+              >
+                <Text style={styles.createAccountButtonText}>
+                  Create Account
+                </Text>
+              </TouchableOpacity>
+              <View style={styles.center}>
+                <Text>OR</Text>
+              </View>
+              <View>
+                <TouchableOpacity
+                  style={styles.createAccountButton}
+                  onPress={() => navigation.replace("Login")}
+                >
+                  <Text style={styles.createAccountButtonText}>Log In</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </ScrollView>
   );
-} 
+}
 
 const styles = StyleSheet.create({
   container: {

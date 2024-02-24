@@ -1,6 +1,7 @@
 // screens/LoginScreen.js
 
 import React, { useEffect, useState } from "react";
+import Toast from 'react-native-toast-message';
 import {
   View,
   Text,
@@ -46,18 +47,26 @@ const LoginScreen = ({ navigation }) => {
 
       await AsyncStorage.setItem("token", token);
 
-      Alert.alert("Login Successful", "JWT token stored successfully!");
+      Toast.show({
+        type: 'success',
+        text1: 'Welcome',
+        text2: 'Logged In !'
+      });
 
       navigation.replace("Home");
     } catch (error) {
-      Alert.alert("Error", "Invalid credentials");
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid',
+        text2: 'Username or password is incorrect !'
+      });
     }
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-
     <View style={styles.container}>
+      
       <View style={styles.headingContainer}>
         <Text style={styles.headingText}>Login</Text>
       </View>

@@ -1,6 +1,7 @@
 // App.js
 
 import React, { useEffect, useState, useRef } from "react";
+import Toast from 'react-native-toast-message';
 import Navigation from "./navigation/Navigation";
 import * as Notifications from "expo-notifications";
 
@@ -42,7 +43,12 @@ export default function App() {
     };
   }, []);
 
-  return <Navigation />;
+  return(
+    <>
+    <Navigation />
+     <Toast />
+    </>
+    );
 }
 
 async function scheduleDailyNotifications() {

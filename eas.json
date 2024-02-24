@@ -1,23 +1,21 @@
 {
-  "cli": {
-    "version": ">= 5.9.2"
-  },
   "build": {
-    "development": {
-      "distribution": "internal",
+    "preview": {
       "android": {
-        "gradleCommand": ":app:assembleDebug"
-      },
-      "ios": {
-        "buildConfiguration": "Debug"
+        "buildType": "apk"
       }
     },
-    "preview": {
+    "preview2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "preview3": {
+      "developmentClient": true
+    },
+    "preview4": {
       "distribution": "internal"
     },
-    "production": {}
-  },
-  "submit": {
     "production": {}
   }
 }

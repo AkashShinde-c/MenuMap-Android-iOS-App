@@ -9,6 +9,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import danger from "../assets/danger.svg";
 import ok from "../assets/ok.svg";
+import Toast from "react-native-toast-message";
 // import scheduleNotification from "../utils/Notification";
 
 export default function HomeScreen({ navigation }) {
@@ -34,10 +35,18 @@ export default function HomeScreen({ navigation }) {
         setIs_menu_updated(true);
         const response = await axios.put(url, result.assets[0].base64);
 
-        Alert.alert("Image uploaded successfully!");
+        Toast.show({
+          type: "success",
+          text1: "Done !",
+          text2: "Menu has been updated !",
+        });
       }
     } catch (error) {
-      Alert.alert("Something went wrong");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Something went wrong!",
+      });
     }
   };
 
@@ -53,7 +62,11 @@ export default function HomeScreen({ navigation }) {
 
       uploadImage(uploadUrl);
     } catch (error) {
-      Alert.alert("Error", "error");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Something went wrong!",
+      });
     }
   };
 
@@ -90,7 +103,11 @@ export default function HomeScreen({ navigation }) {
         setIs_menu_updated(response.data.is_menu_updated);
       } catch (error) {
         // Handle errors here
-        Alert.alert(error.message);
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Could not fetch image",
+        });
       }
     })();
   }, []);
@@ -142,14 +159,14 @@ export default function HomeScreen({ navigation }) {
           <FontAwesome name="upload" size={24} color="white" />
           <Text style={styles.buttonText}>Upload Menu Image</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        {/* <TouchableOpacity style={styles.button}>
           <FontAwesome name="keyboard-o" size={24} color="white" />
           <Text style={styles.buttonText}>Type Menu</Text>
-        </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.button} onPress={handleLogout}>
-          <FontAwesome name="sign-out" size={24} color="white"/>
-          <Text style={styles.buttonText}>Log Out</Text>
         </TouchableOpacity> */}
+        <TouchableOpacity style={styles.button} onPress={handleLogout}>
+          <FontAwesome name="sign-out" size={24} color="white" />
+          <Text style={styles.buttonText}>Log Out</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
